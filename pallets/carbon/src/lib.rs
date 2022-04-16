@@ -31,7 +31,14 @@ pub mod pallet {
         pub owner: AccountOf<T>,
     }
 
-    // ACTION #2: Enum declaration for Gender.
+    // Enum declaration for Source (3rd-party registries)
+    #[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+    #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+    pub enum Source {
+        VCS,
+        GoldStandard,
+        AmericanCarbonRegistry,
+    }
 
     // ACTION #3: Implementation to handle Gender type in Kitty struct.
 
