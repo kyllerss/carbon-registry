@@ -100,8 +100,6 @@ pub mod pallet {
 
     impl<T: Config> Pallet<T> {
 
-        // ACTION #4: helper function for Kitty struct
-
         // TODO Part III: helper functions for dispatchable functions
 
         // ACTION #6: function to randomly generate DNA
