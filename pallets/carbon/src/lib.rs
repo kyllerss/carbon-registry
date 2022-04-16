@@ -19,8 +19,6 @@ pub mod pallet {
 
     // Struct to hold Credit information.
     type AccountOf<T> = <T as frame_system::Config>::AccountId;
-    type BalanceOf<T> =
-    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     // Struct for holding Credit information.
     #[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
