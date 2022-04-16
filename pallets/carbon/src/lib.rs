@@ -4,18 +4,23 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::{
-        sp_runtime::traits::{Hash, Zero},
-        dispatch::{DispatchResultWithPostInfo, DispatchResult},
-        traits::{Currency, ExistenceRequirement, Randomness},
-        pallet_prelude::*
-    };
+    use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+    use frame_support::{
+        sp_runtime::traits::Hash,
+        traits::{ Randomness, Currency, tokens::ExistenceRequirement },
+        transactional
+    };
     use sp_io::hashing::blake2_128;
 
-    // TODO Part II: Struct for holding Kitty information.
+    #[cfg(feature = "std")]
+    use frame_support::serde::{Deserialize, Serialize};
 
-    // TODO Part II: Enum and implementation to handle Gender type in Kitty struct.
+    // ACTION #1: Write a Struct to hold Kitty information.
+
+    // ACTION #2: Enum declaration for Gender.
+
+    // ACTION #3: Implementation to handle Gender type in Kitty struct.
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
@@ -30,8 +35,9 @@ pub mod pallet {
         /// The Currency handler for the Kitties pallet.
         type Currency: Currency<Self::AccountId>;
 
-        // TODO Part II: Specify the custom types for our runtime.
+        // ACTION #5: Specify the type for Randomness we want to specify for runtime.
 
+        // ACTION #9: Add MaxKittyOwned constant
     }
 
     // Errors.
@@ -40,42 +46,48 @@ pub mod pallet {
         // TODO Part III
     }
 
+    // Events.
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
         // TODO Part III
     }
 
-    // Storage item to keep a count of all existing credits..
     #[pallet::storage]
     #[pallet::getter(fn count_for_credits)]
     /// Keeps track of the number of Credits in existence.
     pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, OptionQuery>;
 
-    // TODO Part II: Remaining storage items.
+    // ACTION #7: Remaining storage items.
 
-    // TODO Part III: Our pallet's genesis configuration.
+    // TODO Part IV: Our pallet's genesis configuration.
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
 
         // TODO Part III: create_kitty
 
-        // TODO Part III: set_price
+        // TODO Part IV: set_price
 
-        // TODO Part III: transfer
+        // TODO Part IV: transfer
 
-        // TODO Part III: buy_kitty
+        // TODO Part IV: buy_kitty
 
-        // TODO Part III: breed_kitty
+        // TODO Part IV: breed_kitty
     }
 
-    // TODO Part II: helper function for Kitty struct
+    //** Our helper functions.**//
 
     impl<T: Config> Pallet<T> {
+
+        // ACTION #4: helper function for Kitty struct
+
         // TODO Part III: helper functions for dispatchable functions
 
-        // TODO: increment_nonce, random_hash, mint, transfer_from
+        // ACTION #6: function to randomly generate DNA
 
+        // TODO Part III: mint
+
+        // TODO Part IV: transfer_kitty_to
     }
 }
