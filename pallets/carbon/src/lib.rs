@@ -50,7 +50,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn count_for_credits)]
     /// Keeps track of the number of Credits in existence.
-    pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, ValueQuery>;
+    pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, OptionQuery>;
 
     // TODO Part II: Remaining storage items.
 
