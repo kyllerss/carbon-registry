@@ -46,7 +46,11 @@ pub mod pallet {
         // TODO Part III
     }
 
-    // ACTION: Storage item to keep a count of all existing Kitties.
+    // Storage item to keep a count of all existing credits..
+    #[pallet::storage]
+    #[pallet::getter(fn count_for_credits)]
+    /// Keeps track of the number of Credits in existence.
+    pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, ValueQuery>;
 
     // TODO Part II: Remaining storage items.
 
