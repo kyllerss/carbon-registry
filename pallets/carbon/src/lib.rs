@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
+use scale_info::TypeInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -16,7 +17,21 @@ pub mod pallet {
     #[cfg(feature = "std")]
     use frame_support::serde::{Deserialize, Serialize};
 
-    // ACTION #1: Write a Struct to hold Kitty information.
+    // Struct to hold Credit information.
+    type AccountOf<T> = <T as frame_system::Config>::AccountId;
+    type BalanceOf<T> =
+    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
+    // Struct for holding Credit information.
+    #[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+    #[scale_info(skip_type_params(T))]
+    #[codec(mel_bound())]
+    pub struct Credit<T: Config> {
+        pub source: Source,
+        pub serial_number: [u8; 256],
+        pub retired: bool,
+        pub owner: AccountOf<T>,
+    }
 
     // ACTION #2: Enum declaration for Gender.
 
