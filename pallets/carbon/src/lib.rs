@@ -55,8 +55,6 @@ pub mod pallet {
         /// The Currency handler for the Kitties pallet.
         type Currency: Currency<Self::AccountId>;
 
-        // ACTION #5: Specify the type for Randomness we want to specify for runtime.
-
         // ACTION #9: Add MaxKittyOwned constant
     }
 
@@ -101,8 +99,6 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
 
         // TODO Part III: helper functions for dispatchable functions
-
-        // ACTION #6: function to randomly generate DNA
 
         // TODO Part III: mint
 
