@@ -55,7 +55,9 @@ pub mod pallet {
         /// The Currency handler for the Kitties pallet.
         type Currency: Currency<Self::AccountId>;
 
-        // ACTION #9: Add MaxKittyOwned constant
+        // MaxCreditsOwned constant
+        #[pallet::constant]
+        type MaxCreditsOwned: Get<u32>;
     }
 
     // Errors.
@@ -76,7 +78,26 @@ pub mod pallet {
     /// Keeps track of the number of Credits in existence.
     pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, OptionQuery>;
 
-    // ACTION #7: Remaining storage items.
+    // Storage items for credits
+    #[pallet::storage]
+    #[pallet::getter(fn credits)]
+    pub(super) type Credits<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        T::Hash,
+        Credit<T>,
+    >;
+
+    #[pallet::storage]
+    #[pallet::getter(fn credits_owned)]
+    /// Keeps track of what accounts own which Credits.
+    pub(super) type CreditsOwned<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        T::AccountId,
+        BoundedVec<T::Hash, T::MaxCreditsOwned>,
+        ValueQuery,
+    >;
 
     // TODO Part IV: Our pallet's genesis configuration.
 

@@ -266,10 +266,16 @@ impl pallet_sudo::Config for Runtime {
 	type Call = Call;
 }
 
+parameter_types! {
+    // One can own at most 999,999 Credits
+    pub const MaxCreditsOwned: u32 = 999999;
+}
+
 /// Configure the pallet-carbon in pallets/carbon.
 impl pallet_carbon::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
+	type MaxCreditsOwned = MaxCreditsOwned;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
