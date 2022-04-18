@@ -29,6 +29,7 @@ pub mod pallet {
     pub struct Credit<T: Config> {
         pub source: Source,
         pub serial_number: [u8; 256],
+        pub for_sale: bool,
         pub retired: bool,
         pub owner: AccountOf<T>,
     }
@@ -63,7 +64,27 @@ pub mod pallet {
     // Errors.
     #[pallet::error]
     pub enum Error<T> {
-        // Action #5a: Declare errors
+
+        /// Handles arithmetic overflow when incrementing the Credit counter.
+        CountForCreditsOverflow,
+        /// An account cannot own more Credits than `MaxCreditCount`.
+        ExceedMaxCreditOwned,
+        /// Buyer cannot be the owner.
+        BuyerIsCreditOwner,
+        /// Cannot transfer a credit to its owner.
+        TransferToSelf,
+        /// This credit already exists
+        CreditExists,
+        /// This credit doesn't exist
+        CreditNotExist,
+        /// Handles checking that the Credit is owned by the account transferring, buying or setting a price for it.
+        NotCreditOwner,
+        /// Ensures the Credit is for sale.
+        CreditNotForSale,
+        /// Ensures that the buying price is greater than the asking price.
+        CreditBidPriceTooLow,
+        /// Ensures that an account has enough funds to purchase a Credit.
+        NotEnoughBalance,
     }
 
     // Events.
@@ -156,6 +177,7 @@ pub mod pallet {
             let credit = Credit::<T> {
                 source,
                 serial_number,
+                for_sale: false,
                 retired: false,
                 owner: owner.clone(),
             };
@@ -179,6 +201,7 @@ pub mod pallet {
             <CountForCredits<T>>::put(new_cnt);
             Ok(credit_id)
         }
+
         // Helper to check correct kitty owner
         pub fn is_credit_owner(credit_id: &T::Hash, acct: &T::AccountId) -> Result<bool, Error<T>> {
             match Self::credits(credit_id) {
