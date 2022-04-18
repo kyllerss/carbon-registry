@@ -19,6 +19,8 @@ pub mod pallet {
 
     // Struct to hold Credit information.
     type AccountOf<T> = <T as frame_system::Config>::AccountId;
+    type BalanceOf<T> =
+    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     // Struct for holding Credit information.
     #[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
@@ -68,7 +70,13 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // Action #3: Declare events
+
+        /// A new Credit was successfully created. \[sender, credit_id\]
+        Created(T::AccountId, T::Hash),
+        /// A Credit was successfully transferred. \[from, to, credit_id\]
+        Transferred(T::AccountId, T::AccountId, T::Hash),
+        /// A Credit was successfully bought. \[buyer, seller, credit_id, bid_price\]
+        Bought(T::AccountId, T::AccountId, T::Hash, BalanceOf<T>),
     }
 
     #[pallet::storage]
@@ -116,7 +124,8 @@ pub mod pallet {
             // Logging to the console
             log::info!("A credit is created with ID: {:?}.", credit_id);
 
-            // ACTION #4: Deposit `Created` event
+            // Deposit `Created` event
+            Self::deposit_event(Event::Created(sender, credit_id));
 
             Ok(())
         }
