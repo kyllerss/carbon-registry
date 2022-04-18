@@ -40,8 +40,6 @@ pub mod pallet {
         AmericanCarbonRegistry,
     }
 
-    // ACTION #3: Implementation to handle Gender type in Kitty struct.
-
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
@@ -52,7 +50,7 @@ pub mod pallet {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        /// The Currency handler for the Kitties pallet.
+        /// The Currency handler for the Credits pallet.
         type Currency: Currency<Self::AccountId>;
 
         // MaxCreditsOwned constant
@@ -63,20 +61,20 @@ pub mod pallet {
     // Errors.
     #[pallet::error]
     pub enum Error<T> {
-        // TODO Part III
+        // Action #5a: Declare errors
     }
 
     // Events.
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        // TODO Part III
+        // Action #3: Declare events
     }
 
     #[pallet::storage]
     #[pallet::getter(fn count_for_credits)]
     /// Keeps track of the number of Credits in existence.
-    pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, OptionQuery>;
+    pub(super) type CountForCredits<T: Config> = StorageValue<_, u64, ValueQuery>;
 
     // Storage items for credits
     #[pallet::storage]
@@ -104,7 +102,24 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
 
-        // TODO Part III: create_kitty
+        /// Create a new unique credit.
+        ///
+        /// The actual credit creation is done in the `mint()` function.
+        #[pallet::weight(100)]
+        pub fn create_credit(origin: OriginFor<T>,
+                             source: Source,
+                             serial_number: [u8; 256]
+        ) -> DispatchResult {
+
+            let sender = ensure_signed(origin)?;
+            let credit_id = Self::mint(&sender, source, serial_number)?;
+            // Logging to the console
+            log::info!("A credit is created with ID: {:?}.", credit_id);
+
+            // ACTION #4: Deposit `Created` event
+
+            Ok(())
+        }
 
         // TODO Part IV: set_price
 
@@ -121,7 +136,47 @@ pub mod pallet {
 
         // TODO Part III: helper functions for dispatchable functions
 
-        // TODO Part III: mint
+        // Helper to mint a Credit.
+        //
+        // TODO Should prevent minting of credit with same source and serial number.
+        pub fn mint(
+            owner: &T::AccountId,
+            source: Source,
+            serial_number: [u8; 256]
+        ) -> Result<T::Hash, Error<T>> {
+            let credit = Credit::<T> {
+                source,
+                serial_number,
+                retired: false,
+                owner: owner.clone(),
+            };
+
+            // TODO Replace this with hash of CreditIdentity struct component (once impl'd)
+            let credit_id = T::Hashing::hash_of(&credit);
+
+            // Performs this operation first as it may fail
+            let new_cnt = Self::count_for_credits().checked_add(1)
+                .ok_or(<Error<T>>::CountForCreditsOverflow)?;
+
+            // Check if the credit does not already exist in our storage map
+            ensure!(Self::credits(&credit_id) == None, <Error<T>>::CreditExists);
+
+            // Performs this operation first because as it may fail
+            <CreditsOwned<T>>::try_mutate(&owner, |credit_vec| {
+                credit_vec.try_push(credit_id)
+            }).map_err(|_| <Error<T>>::ExceedMaxCreditOwned)?;
+
+            <Credits<T>>::insert(credit_id, credit);
+            <CountForCredits<T>>::put(new_cnt);
+            Ok(credit_id)
+        }
+        // Helper to check correct kitty owner
+        pub fn is_credit_owner(credit_id: &T::Hash, acct: &T::AccountId) -> Result<bool, Error<T>> {
+            match Self::credits(credit_id) {
+                Some(credit) => Ok(credit.owner == *acct),
+                None => Err(<Error<T>>::CreditNotExist)
+            }
+        }
 
         // TODO Part IV: transfer_kitty_to
     }
