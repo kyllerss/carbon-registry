@@ -2,6 +2,9 @@
 
 pub use pallet::*;
 use scale_info::TypeInfo;
+//use frame_support::dispatch::Vec;
+// use frame_support::inherent::Vec;
+//use sp_std::prelude::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -28,7 +31,7 @@ pub mod pallet {
     #[codec(mel_bound())]
     pub struct Credit<T: Config> {
         pub source: Source,
-        pub serial_number: [u8; 256],
+        pub serial_number: BoundedVec<u8, T::MaxLength>, //[u8; 4],
         pub for_sale: bool,
         pub retired: bool,
         pub owner: AccountOf<T>,
@@ -59,6 +62,10 @@ pub mod pallet {
         // MaxCreditsOwned constant
         #[pallet::constant]
         type MaxCreditsOwned: Get<u32>;
+
+        // Maximum length a serial number can be
+        #[pallet::constant]
+        type MaxLength: Get<u32>;
     }
 
     // Errors.
@@ -85,6 +92,8 @@ pub mod pallet {
         CreditBidPriceTooLow,
         /// Ensures that an account has enough funds to purchase a Credit.
         NotEnoughBalance,
+        /// Serial number too long
+        SerialNumberTooLong,
     }
 
     // Events.
@@ -137,13 +146,16 @@ pub mod pallet {
         #[pallet::weight(100)]
         pub fn create_credit(origin: OriginFor<T>,
                              source: Source,
-                             serial_number: [u8; 256]
+                             serial_number: Vec<u8>
         ) -> DispatchResult {
 
             let sender = ensure_signed(origin)?;
-            let credit_id = Self::mint(&sender, source, serial_number)?;
+            let credit_id = Self::mint(&sender, source.clone(), serial_number.clone())?;
             // Logging to the console
-            log::info!("A credit is created with ID: {:?}.", credit_id);
+            log::info!("Credit created -> id: {:?}, source: {:?}, serial_number: {:?}.",
+                credit_id,
+                &source,
+                &serial_number);
 
             // Deposit `Created` event
             Self::deposit_event(Event::Created(sender, credit_id));
@@ -172,8 +184,11 @@ pub mod pallet {
         pub fn mint(
             owner: &T::AccountId,
             source: Source,
-            serial_number: [u8; 256]
+            serial_num: Vec<u8>
         ) -> Result<T::Hash, Error<T>> {
+
+            let serial_number: BoundedVec<_, _> =
+                serial_num.try_into().map_err(|()| Error::<T>::SerialNumberTooLong)?;
             let credit = Credit::<T> {
                 source,
                 serial_number,
@@ -190,7 +205,7 @@ pub mod pallet {
                 .ok_or(<Error<T>>::CountForCreditsOverflow)?;
 
             // Check if the credit does not already exist in our storage map
-            ensure!(Self::credits(&credit_id) == None, <Error<T>>::CreditExists);
+            ensure!(Self::credits(&credit_id).is_some(), <Error<T>>::CreditExists);
 
             // Performs this operation first because as it may fail
             <CreditsOwned<T>>::try_mutate(&owner, |credit_vec| {
