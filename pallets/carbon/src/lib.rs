@@ -28,7 +28,7 @@ pub mod pallet {
     #[codec(mel_bound())]
     pub struct Credit<T: Config> {
         pub source: Source,
-        pub serial_number: [u8; 256],
+        pub serial_number: [u8; 64],
         pub for_sale: bool,
         pub retired: bool,
         pub owner: AccountOf<T>,
@@ -134,10 +134,10 @@ pub mod pallet {
         /// Create a new unique credit.
         ///
         /// The actual credit creation is done in the `mint()` function.
-        #[pallet::weight(100)]
+        #[pallet::weight(1)]
         pub fn create_credit(origin: OriginFor<T>,
                              source: Source,
-                             serial_number: [u8; 256]
+                             serial_number: [u8; 64]
         ) -> DispatchResult {
 
             let sender = ensure_signed(origin)?;
@@ -172,7 +172,7 @@ pub mod pallet {
         pub fn mint(
             owner: &T::AccountId,
             source: Source,
-            serial_number: [u8; 256]
+            serial_number: [u8; 64]
         ) -> Result<T::Hash, Error<T>> {
             let credit = Credit::<T> {
                 source,
